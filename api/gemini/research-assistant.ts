@@ -1,5 +1,5 @@
 import type { ApiRequest, ApiResponse } from '../_lib/http';
-import { researchAssistantHandler } from '../_lib/geminiAssistant.ts';
+import { researchAssistantHandler } from '../_lib/geminiAssistant.js';
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   return researchAssistantHandler(req, res);
