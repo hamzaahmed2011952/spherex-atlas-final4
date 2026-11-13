@@ -1,0 +1,1292 @@
+SPHEREx ATLAS — MASTER FINALIZATION DIRECTIVE
+
+Complete Engineering Repair, Scientific Validation, Security Hardening & Production-Ready Delivery
+
+You are now acting as a complete senior engineering team consisting of:
+
+- Senior Full-Stack Software Architect
+- Senior React + TypeScript Engineer
+- Node.js / Express Backend Engineer
+- Astronomical Data Scientist
+- FITS / Astropy / WCS Specialist
+- Scientific Image Processing Engineer
+- API Integration Engineer
+- Cybersecurity Engineer
+- QA Automation Engineer
+- UI/UX Engineer
+
+Your mission is to take the EXISTING SPHEREx ATLAS project and finish it to the highest technically achievable standard.
+
+This is not a request for a superficial code review, a list of recommendations, or another progress report.
+
+YOU MUST IMPLEMENT THE FIXES DIRECTLY IN THE PROJECT FILES.
+
+You must inspect the entire existing codebase, identify every meaningful defect, repair it, integrate the modules, run the available tests, and produce a final working project.
+
+Do not stop after inspecting the code.
+Do not stop after fixing the first errors.
+Do not stop after making the build pass.
+Do not merely describe what should be done.
+
+Continue working until all achievable requirements below are implemented and verified.
+
+---
+
+1. PROJECT MISSION — DO NOT CHANGE THE CORE IDEA
+
+SPHEREx ATLAS is a public-facing astronomical exploration platform designed to help users explore SPHEREx observations of the sky over time.
+
+SPHEREx surveys the entire sky in 102 near-infrared spectral bands, allowing scientists to investigate astronomical objects and their properties.
+
+The core experience must allow users to:
+
+1. Enter celestial coordinates (Right Ascension and Declination).
+2. Search the real SPHEREx archive for observations of that sky region.
+3. Discover available observations and their actual observation dates.
+4. Retrieve real astronomical image products when accessible.
+5. Display observations chronologically.
+6. Explore image changes over time.
+7. Compare compatible observations.
+8. Explore spectral information when actual suitable data is available.
+9. Inspect FITS image metadata, WCS information, and scientific measurements.
+10. Distinguish real scientific data from external, simulated, unavailable, and unverified data.
+
+The application must remain honest about the limitations of the actual SPHEREx archive.
+
+Never fabricate observations, dates, scientific measurements, spectra, detections, or archive provenance.
+
+---
+
+2. NON-NEGOTIABLE ENGINEERING RULES
+
+These rules apply to the entire project.
+
+Rule A — Inspect before modifying
+
+First inspect every important project file and understand the existing architecture.
+
+Do not replace working modules blindly.
+
+Do not rebuild the application from scratch.
+
+Preserve the existing visual identity, component structure, features, and user experience wherever possible.
+
+Rule B — Implement, do not just report
+
+For every identified issue:
+
+1. Locate the exact source file.
+2. Understand the root cause.
+3. Implement the correction.
+4. Update related modules when necessary.
+5. Add or update tests.
+6. Execute the relevant tests.
+7. Record the actual result.
+
+Rule C — No fabricated scientific data
+
+Never label synthetic or demo data as REAL ARCHIVE DATA.
+
+Never convert missing archive results into fake observations.
+
+Never invent observation dates to fill missing metadata.
+
+Never invent FITS URLs.
+
+Never invent 102-band spectra from generic values and present them as measured SPHEREx spectra.
+
+Rule D — No fake test success
+
+A successful TypeScript compilation does not prove scientific correctness.
+
+A successful API status check does not prove that FITS products can be downloaded.
+
+A successful FITS download does not prove that the FITS image was correctly parsed.
+
+A successful image parser test does not prove that WCS coordinates are accurate.
+
+A simulated image comparison does not prove that real astronomical changes were detected.
+
+Report these stages separately.
+
+Rule E — Do not stop at the first blocker
+
+If an external archive endpoint fails, investigate the failure, inspect the official metadata and API behavior, and implement robust error handling.
+
+Do not invent a successful response to bypass an external service failure.
+
+Continue fixing all other independent issues.
+
+Rule F — Preserve the project
+
+Do not remove existing modules or features simply because they are difficult to fix.
+
+Do not replace functional modules with static mockups.
+
+Do not simplify the project into a basic dashboard.
+
+Do not delete functionality without documenting a genuine technical reason.
+
+---
+
+3. BACKEND — COMPLETE ARCHIVE INTEGRATION
+
+Inspect and repair "server.ts" and every related backend service.
+
+3.1 IRSA TAP integration
+
+Use the official NASA/IPAC Infrared Science Archive services and verify the actual SPHEREx data model.
+
+Primary TAP endpoint:
+
+https://irsa.ipac.caltech.edu/TAP/sync
+
+Do not assume table names, column names, data types, or relationships.
+
+Inspect the actual TAP_SCHEMA metadata before constructing queries.
+
+Verify the existence and structure of the relevant SPHEREx tables, including any applicable:
+
+- spherex.obscore
+- spherex.observation
+- spherex.plane
+- spherex.artifact
+- spherex.provenance_input
+- splices
+
+Only use tables and columns confirmed to exist.
+
+Implement:
+
+- Correct ADQL queries.
+- Coordinate-based cone searches.
+- RA validation: 0–360 degrees.
+- Dec validation: -90 to +90 degrees.
+- FOV validation.
+- Proper angular distance calculations.
+- Parameter validation and safe query construction.
+- Correct observation metadata extraction.
+- Actual product URL extraction.
+- Correct MJD-to-UTC conversion.
+- Pagination where needed.
+- Sorting by observation time.
+- Deduplication using actual product or observation identifiers.
+
+Never assume that every record returned by "obscore" represents a downloadable image.
+
+Clearly distinguish:
+
+- Observation metadata available.
+- Image product available.
+- DataLink URL available.
+- FITS download successful.
+- FITS parsing successful.
+
+These are different states.
+
+3.2 Archive status endpoint
+
+Ensure:
+
+"GET /api/archive/status"
+
+Returns a truthful response containing:
+
+- Connection status.
+- Actual TAP endpoint.
+- Response time.
+- Verified table availability.
+- Last successful metadata check.
+- Clear error information when unavailable.
+
+Do not return "connected: true" merely because the endpoint responds.
+
+Connection and schema verification must be meaningful.
+
+3.3 Archive search endpoint
+
+Ensure:
+
+"POST /api/archive/search"
+
+Supports:
+
+- RA.
+- Dec.
+- FOV.
+- Target name when applicable.
+- Search cancellation.
+- Request timeout.
+- Retry for appropriate transient errors.
+- Pagination.
+- Empty results.
+- Archive errors.
+- Invalid coordinates.
+- Malformed responses.
+
+Return normalized observation records with the real metadata available from the archive.
+
+Each record should preserve, where available:
+
+- Observation identifier.
+- Target name.
+- RA.
+- Dec.
+- Observation start and end times.
+- MJD.
+- Exposure time.
+- Band identifier or wavelength metadata.
+- Calibration level.
+- Product identifier.
+- Product URL.
+- Product format.
+- Source archive.
+- Provenance.
+
+Missing values must remain null or explicitly unavailable.
+
+Do not substitute invented values.
+
+3.4 Real FITS retrieval
+
+Ensure:
+
+"GET /api/archive/fits"
+
+Can retrieve actual FITS products from verified archive product links.
+
+Implement:
+
+- HTTPS-only access.
+- Strict host allowlisting based on verified official archive infrastructure.
+- Safe redirect validation at every redirect.
+- DNS/IP validation where appropriate to prevent SSRF.
+- Private, loopback, link-local, and reserved IP rejection.
+- Maximum download size.
+- Connection timeout.
+- Total request timeout.
+- Abort handling.
+- Content-type validation.
+- FITS signature validation.
+- Safe error responses.
+- No arbitrary user-supplied URL fetching.
+
+Do not allow every arbitrary subdomain of a broad cloud-provider domain.
+
+If an official archive product redirects to a storage host, verify and allow only the required legitimate hosts.
+
+Never expose unrestricted server-side URL fetching.
+
+Use streaming or bounded downloads when possible.
+
+Do not silently return an HTML error page as a FITS file.
+
+Preserve the original product URL and provenance in the response.
+
+3.5 API errors
+
+All endpoints must return consistent, structured errors.
+
+Use meaningful HTTP statuses, including:
+
+- 200 for successful operations.
+- 400 for invalid user input.
+- 404 for missing resources.
+- 413 for oversized products.
+- 429 when rate limiting applies.
+- 502 or 503 for upstream archive problems.
+- 504 for genuine timeouts.
+
+Never convert an upstream failure into a fake successful observation.
+
+---
+
+4. DATA PROVENANCE — ONE CONSISTENT SYSTEM
+
+Implement one shared provenance model used across the entire application.
+
+Use explicit states such as:
+
+- REAL_ARCHIVE_DATA
+- EXTERNAL_CATALOG_DATA
+- SIMULATED_DEMO_DATA
+- UNAVAILABLE
+- UNKNOWN
+
+Define the transitions carefully.
+
+Examples:
+
+A CDS Sesame coordinate resolution is external catalog data, not SPHEREx observation data.
+
+An IRSA metadata result is archive metadata, not necessarily a successfully downloaded FITS image.
+
+A successfully downloaded and validated archive FITS product can be labeled real archive data.
+
+A generated FITS sample is simulated demo data.
+
+An unknown uploaded file must not automatically become real archive data.
+
+An unavailable product must never be represented as a real image.
+
+Every module, chart, image, export, report, and AI response must respect this system.
+
+Remove any inconsistent logic that labels data as real based only on the existence of a parsed FITS buffer.
+
+Display provenance visibly and consistently.
+
+---
+
+5. FITS ENGINE — SCIENTIFICALLY RELIABLE IMPLEMENTATION
+
+This is one of the highest-priority parts of the project.
+
+Inspect and substantially improve:
+
+"src/services/fitsEngine.ts"
+
+Do not assume that parsing a simple 256×256 demo file is sufficient.
+
+5.1 FITS header parsing
+
+Implement reliable parsing of:
+
+- SIMPLE.
+- BITPIX.
+- NAXIS.
+- NAXIS1, NAXIS2 and higher dimensions.
+- EXTEND.
+- BSCALE.
+- BZERO.
+- BLANK.
+- BUNIT.
+- BTYPE.
+- CRPIX.
+- CRVAL.
+- CDELT.
+- CD matrix.
+- PC matrix.
+- CTYPE.
+- CUNIT.
+- EQUINOX.
+- RADESYS.
+- DATE-OBS.
+- MJD-OBS.
+- OBJECT.
+- FILTER.
+- BAND metadata when present.
+
+Respect FITS 2880-byte block alignment.
+
+Handle header continuation cards when relevant.
+
+Reject malformed or truncated headers safely.
+
+5.2 Pixel data
+
+Support valid FITS image data types:
+
+- BITPIX 8.
+- BITPIX 16.
+- BITPIX 32.
+- BITPIX 64.
+- BITPIX -32.
+- BITPIX -64.
+
+Handle:
+
+- Big-endian representation.
+- BSCALE and BZERO.
+- BLANK values.
+- NaN and Infinity.
+- Data bounds.
+- Multiple dimensions.
+- Truncated data.
+- Memory limitations.
+
+Do not silently replace invalid values with scientifically meaningful-looking values.
+
+Preserve invalid-pixel information where possible.
+
+5.3 Multi-extension FITS
+
+Support proper HDU iteration.
+
+Do not assume the first extension is always the only useful extension.
+
+Identify image HDUs and distinguish them from binary tables and other HDU types.
+
+Expose an HDU selector in the UI when multiple image extensions are available.
+
+For each HDU, display its:
+
+- Index.
+- Type.
+- Dimensions.
+- BITPIX.
+- Relevant header metadata.
+
+Handle missing or unsupported HDUs gracefully.
+
+5.4 FITS statistics
+
+Calculate reliable image statistics.
+
+Include:
+
+- Minimum.
+- Maximum.
+- Mean.
+- Standard deviation.
+- Valid pixel count.
+- Invalid pixel count.
+- Median where feasible.
+- Percentiles where useful.
+
+Exclude NaN, Infinity, and blank pixels from valid-pixel statistics.
+
+For large images, use efficient algorithms and clearly document approximations.
+
+Do not allow one invalid pixel to corrupt the entire calculation.
+
+5.5 WCS — CRITICAL
+
+The current simplified coordinate conversion must not be presented as a scientifically accurate full WCS solution.
+
+Implement a proper WCS solution or integrate a suitable established astronomical WCS library.
+
+Support, as appropriate:
+
+- TAN projection.
+- TAN-SIP distortion.
+- CD matrix.
+- PC matrix with CDELT.
+- Axis ordering.
+- RA wraparound.
+- Negative pixel scales.
+- Coordinate units.
+- Image-to-world transformations.
+- World-to-image transformations.
+
+For TAN-SIP, correctly apply distortion polynomials where supported.
+
+If a particular WCS projection or distortion model is unsupported, explicitly show that it is unsupported.
+
+Never silently fall back to an incorrect linear conversion and label it accurate.
+
+Add numerical validation tests against known WCS reference cases or a trusted astronomical implementation.
+
+If the browser implementation cannot support the complete solution, implement a clearly separated service or library integration and document its limitations.
+
+5.6 FITS rendering
+
+Improve:
+
+- Image scaling.
+- Contrast.
+- Histogram.
+- Percentile-based visualization.
+- Negative-value handling.
+- Invalid pixels.
+- Zoom.
+- Pan.
+- Image resizing.
+- Large-image performance.
+
+Ensure rendering does not modify the original scientific pixel data.
+
+Display a clear distinction between visualization scaling and actual measured pixel values.
+
+---
+
+6. SKY EXPLORER — COMPLETE USER WORKFLOW
+
+Inspect and finish "SkyExplorer.tsx" and its supporting services.
+
+The complete flow must work:
+
+1. User enters coordinates.
+2. Inputs are validated.
+3. User selects an FOV.
+4. Application searches the real archive.
+5. Loading state appears.
+6. Results are normalized and displayed.
+7. Each observation shows its actual available metadata.
+8. User can inspect a product.
+9. User can download or load an actual FITS image when a valid product is available.
+10. The image opens in the appropriate viewer.
+11. Provenance is displayed correctly.
+
+Support:
+
+- Decimal coordinates.
+- Validated sexagesimal coordinates where supported.
+- RA wraparound.
+- Negative declination.
+- Empty results.
+- Slow archive responses.
+- Retry.
+- Cancellation.
+- Duplicate observations.
+- Unavailable products.
+
+Do not display a successful search if only coordinate resolution succeeded.
+
+Keep coordinate resolution and archive observation search as separate operations.
+
+Add useful user-facing error messages.
+
+---
+
+7. TARGET INTELLIGENCE — REAL OBJECT INFORMATION
+
+Inspect "TargetIntelligence.tsx".
+
+The challenge objects must be supported:
+
+1. Barnard's Star.
+2. Epsilon Indi B.
+3. WISE 0855.
+4. RW Aurigae.
+5. R Draconis.
+
+Use accurate target resolution.
+
+Preserve the exact supplied coordinates for WISE 0855:
+
+RA: 08h55m10.831s
+Dec: -07d14m42.53s
+
+Do not assume a target has SPHEREx observations merely because its coordinates resolve.
+
+Separate:
+
+- Target identity.
+- External catalog coordinates.
+- Archive search results.
+- Retrieved products.
+- Scientific analysis.
+
+Remove generic invented molecular information from target results.
+
+If scientific target information is not available from a reliable source, show that it is unavailable.
+
+Allow users to search arbitrary valid sky coordinates.
+
+---
+
+8. OBSERVATION TIMELINE — REAL CHRONOLOGICAL DATA
+
+Inspect:
+
+"ObservationTimeline.tsx"
+
+This module must use actual archive observations, not a hardcoded target timeline.
+
+Requirements:
+
+- Filter observations for the currently selected target or coordinate region.
+- Use actual observation timestamps.
+- Sort chronologically.
+- Deduplicate products.
+- Show actual observation metadata.
+- Display product availability.
+- Load the correct FITS product for each selected epoch.
+- Support previous/next controls.
+- Support play/pause.
+- Provide a playback speed control.
+- Handle loading and failed products.
+- Cancel outdated requests when the user changes targets.
+- Preserve the current target and observation selection.
+
+Every displayed frame must be associated with the correct observation and product.
+
+Do not generate fake historical epochs.
+
+Do not use the current date when an observation timestamp is missing.
+
+When there is no usable observation time, display "Observation date unavailable."
+
+If the archive contains no usable observations, show UNAVAILABLE and offer a clearly labeled educational demo mode.
+
+Important: Multiple metadata records do not necessarily mean multiple distinct observation epochs.
+
+Verify that Timeline frames represent distinct, valid observation products.
+
+---
+
+9. IMAGE COMPARISON — REAL SCIENTIFIC COMPARISON
+
+Inspect:
+
+"ImageComparison.tsx"
+
+and:
+
+"computeImageDifference()" in "fitsEngine.ts".
+
+The current synthetic comparison must remain clearly labeled as a demo.
+
+Implement actual image comparison for real compatible FITS products.
+
+Before subtraction, verify:
+
+- Compatible coordinate systems.
+- Compatible WCS.
+- Compatible pixel scales.
+- Compatible image dimensions or valid reprojection.
+- Compatible units.
+- Compatible band or wavelength.
+- Compatible calibration levels.
+- Appropriate observation metadata.
+
+When images have different WCS grids, implement or integrate reliable image reprojection before comparison.
+
+Do not subtract two arrays merely because their dimensions match.
+
+Where appropriate, account for:
+
+- Background differences.
+- Invalid pixels.
+- Flux scaling.
+- Noise.
+- PSF differences.
+- Astrometric alignment.
+
+If reliable alignment or calibration is not possible, refuse the scientific comparison and explain why.
+
+Implement:
+
+- Side-by-side view.
+- Difference image.
+- Blend.
+- Curtain comparison.
+- Zoom and pan.
+- Image statistics.
+- Compatibility warnings.
+- Provenance labels.
+
+A difference image must preserve scientific meaning.
+
+Do not claim that an object moved or changed simply because two images look different.
+
+Add suitable synthetic tests and separate real-product validation tests.
+
+---
+
+10. SPECTRAL STUDIO — HONEST 102-BAND EXPLORATION
+
+Inspect:
+
+"SpectralStudio.tsx"
+
+SPHEREx has 102 spectral bands, but that does not mean every archive image product is already a complete 102-element spectrum.
+
+Implement a correct distinction between:
+
+1. Actual measured spectral data.
+2. Actual image data from individual bands.
+3. Spectrum extracted from appropriate real data.
+4. Simulated educational spectrum.
+
+Never populate a real spectrum with invented values.
+
+If the available archive product is a 2D image rather than a suitable spectral product, do not pretend that it contains a complete 102-band spectrum.
+
+Investigate the official product documentation and available data products to determine whether a valid spectral extraction workflow can be implemented.
+
+If real spectral extraction is possible, implement it using the correct product format, metadata, calibration, and units.
+
+If it is not currently possible from the available archive data, provide a useful and clearly labeled simulated demonstration.
+
+Display:
+
+- Wavelength.
+- Flux or intensity.
+- Units.
+- Band identifier.
+- Data source.
+- Provenance.
+- Extraction method.
+- Missing data indicators.
+
+Ensure CSV and JSON exports preserve all relevant metadata and provenance.
+
+Never export simulated values as real measurements.
+
+---
+
+11. MULTI-DATASET EXPLORATION
+
+Inspect "MultiDatasets.tsx".
+
+Do not represent static or demo overlays as live scientific catalog integrations.
+
+For each overlay, clearly state:
+
+- Source.
+- Data availability.
+- Coordinate system.
+- Whether it is real, external, simulated, or unavailable.
+
+If integrating external catalogs such as Gaia or WISE, use verified official endpoints and real returned records.
+
+If the integration is unavailable, show that honestly.
+
+Ensure coordinate matching is performed correctly.
+
+Do not create fake cross-matches.
+
+---
+
+12. AI RESEARCH ASSISTANT
+
+Inspect the Gemini integration and "AiAssistant.tsx".
+
+The AI assistant must:
+
+- Explain real archive metadata.
+- Explain FITS headers.
+- Explain supported WCS information.
+- Summarize actual image statistics.
+- Explain observation timelines.
+- Explain comparison limitations.
+- Distinguish simulated and real information.
+- State uncertainty explicitly.
+- Never invent archive observations or measurements.
+
+Ground answers in the data actually supplied to the assistant.
+
+Do not allow the assistant to invent a source or claim it retrieved a product when it did not.
+
+If "GEMINI_API_KEY" is missing:
+
+- The main application must still work.
+- Display a clear optional-feature message.
+- Do not crash.
+- Do not expose API keys in frontend code.
+- Do not expose secrets in logs or API responses.
+
+Use the appropriate current supported Gemini model and SDK configuration already compatible with the project. Do not invent model names.
+
+---
+
+13. RESEARCH WORKSPACE AND REPORT GENERATOR
+
+Inspect:
+
+- "ResearchWorkspace.tsx"
+- "ReportGenerator.tsx"
+- "AppContext.tsx"
+
+Ensure:
+
+- Saved targets persist correctly.
+- Research notes persist correctly.
+- Selected target state remains consistent.
+- Selected observation is not lost unexpectedly.
+- FITS data selection is reliable.
+- Reports use actual available data.
+- Simulated data is explicitly labeled.
+- Missing data is never replaced by fabricated values.
+
+Reports should include, when available:
+
+- Target coordinates.
+- Archive query parameters.
+- Observation identifiers.
+- Observation dates.
+- Product identifiers.
+- FITS metadata.
+- WCS status.
+- Image statistics.
+- Spectral provenance.
+- Comparison compatibility.
+- Limitations.
+- Data sources.
+
+Never make a scientific conclusion stronger than the underlying data supports.
+
+---
+
+14. USER INTERFACE AND EXPERIENCE
+
+Inspect the entire UI.
+
+Preserve the current SPHEREx ATLAS visual identity and professional dashboard experience.
+
+Improve consistency without unnecessarily redesigning everything.
+
+Check:
+
+- Navigation.
+- All module routes.
+- Arabic and English translations.
+- RTL and LTR layout.
+- Responsive layout.
+- Loading states.
+- Empty states.
+- Error states.
+- Success states.
+- Tooltips.
+- Modal behavior.
+- Keyboard accessibility.
+- Button functionality.
+- Form validation.
+- Mobile usability.
+- Large-screen usability.
+
+Every visible interactive control must perform its advertised action.
+
+Remove dead buttons, fake functionality, placeholder success messages, and misleading labels.
+
+Do not leave TODOs or placeholder content in core workflows.
+
+Demo functionality may remain, but it must be clearly separated from real archive functionality.
+
+---
+
+15. SECURITY AND RELIABILITY AUDIT
+
+Audit the entire project for:
+
+- SSRF.
+- Unsafe redirects.
+- Unrestricted URL fetching.
+- Missing request size limits.
+- Missing timeout handling.
+- API key exposure.
+- Unsafe environment variable handling.
+- XSS.
+- Unsafe HTML rendering.
+- Injection vulnerabilities.
+- Unhandled promise rejections.
+- Memory exhaustion from large FITS files.
+- Excessive repeated archive requests.
+- Missing rate limiting where appropriate.
+- Inadequate error handling.
+
+Use safe defaults.
+
+Never log secrets.
+
+Never send private keys to the frontend.
+
+Do not weaken security controls to make a test pass.
+
+---
+
+16. TESTING — ACTUAL EXECUTION REQUIRED
+
+Create or improve a proper automated test suite.
+
+Do not rely exclusively on TypeScript compilation.
+
+16.1 Build and type checking
+
+Run the actual project scripts.
+
+At minimum:
+
+- npm install or the appropriate lockfile-based installation.
+- npm run build.
+- npx tsc --noEmit.
+- All available tests.
+
+Resolve dependency conflicts.
+
+Inspect "package.json", "package-lock.json", "bun.lock", and other lockfiles.
+
+Ensure the project has one coherent, reproducible dependency installation strategy.
+
+Do not leave incompatible dependency versions.
+
+16.2 Backend tests
+
+Test:
+
+- Valid archive status.
+- Unavailable archive.
+- Invalid RA.
+- Invalid Dec.
+- Invalid FOV.
+- Empty archive results.
+- Multiple results.
+- Pagination.
+- Duplicate results.
+- Timeout.
+- Upstream 500.
+- Upstream 504.
+- Invalid DataLink URL.
+- Disallowed host.
+- Unsafe redirect.
+- Oversized FITS.
+- Invalid FITS content.
+- Aborted requests.
+
+16.3 FITS tests
+
+Use actual FITS fixtures when available.
+
+Test:
+
+- Every supported BITPIX.
+- Header parsing.
+- Header block alignment.
+- BSCALE/BZERO.
+- BLANK.
+- NaN and Infinity.
+- Truncated files.
+- Multiple HDUs.
+- Multiple image dimensions.
+- WCS.
+- TAN.
+- TAN-SIP.
+- CD matrix.
+- PC matrix.
+- RA wraparound.
+- Image statistics.
+- Rendering.
+
+Use independently validated reference cases where possible.
+
+16.4 Integration tests
+
+Test the complete flow:
+
+Coordinates → Archive Search → Observation Results → Product Retrieval → FITS Parsing → Image Rendering.
+
+Also test:
+
+Coordinates → Multiple Observations → Timeline → Real Image Selection.
+
+Also test:
+
+Two Real FITS Products → Compatibility Validation → Reprojection if needed → Difference Image.
+
+Also test:
+
+Real Data → Correct Provenance → CSV/JSON Export → Research Report.
+
+16.5 Five challenge targets
+
+Test the five challenge objects separately:
+
+- Barnard's Star.
+- Epsilon Indi B.
+- WISE 0855.
+- RW Aurigae.
+- R Draconis.
+
+For each one, record:
+
+1. Target resolution result.
+2. Resolved coordinates.
+3. Archive search request.
+4. Actual HTTP status.
+5. Number of archive records.
+6. Number of distinct observation epochs.
+7. Number of valid product links.
+8. Number of successful FITS downloads.
+9. Number of successfully parsed FITS products.
+10. Number of rendered real images.
+11. Timeline availability.
+12. Image comparison availability.
+13. Spectral data availability.
+
+Do not infer these values from another target.
+
+Do not invent missing values.
+
+If the archive returns zero results, preserve zero.
+
+If the archive is unreachable, report the test as blocked or unverified, not passed.
+
+---
+
+17. PERFORMANCE
+
+Optimize the application for large astronomical FITS products.
+
+Implement appropriate:
+
+- Request cancellation.
+- In-memory caching with bounded memory.
+- Duplicate request prevention.
+- Efficient pixel processing.
+- Canvas rendering optimization.
+- Large-image safeguards.
+- Lazy loading.
+- Component rendering optimization.
+
+Do not cache data indefinitely without limits.
+
+Do not let old requests overwrite the current selected target.
+
+Ensure changing targets cancels or safely ignores obsolete requests.
+
+---
+
+18. DEPENDENCY AND PROJECT STRUCTURE FINALIZATION
+
+Review the complete folder structure.
+
+Remove:
+
+- Unused dependencies.
+- Dead code.
+- Duplicate services.
+- Obsolete mock implementations that are no longer needed.
+- Conflicting lockfiles where appropriate.
+- Unused imports.
+- Debug-only code in production paths.
+
+Do not remove useful educational demo functionality.
+
+Ensure:
+
+- "npm run dev" works.
+- "npm run build" works.
+- TypeScript checks work.
+- Environment variables are documented.
+- A clean installation is reproducible.
+
+Create or update a ".env.example" file containing placeholder names only, never actual secrets.
+
+Update README documentation with:
+
+- Project purpose.
+- Architecture.
+- Installation.
+- Running locally.
+- Environment variables.
+- API endpoints.
+- Real versus demo data.
+- FITS processing.
+- Scientific limitations.
+- Troubleshooting.
+- Testing.
+
+---
+
+19. FINAL ACCEPTANCE CRITERIA
+
+The project cannot be called complete merely because it compiles.
+
+All of the following must be addressed:
+
+[ ] Existing project architecture preserved.
+
+[ ] Backend archive integration verified.
+
+[ ] Archive schema checked against actual metadata.
+
+[ ] Search validation works.
+
+[ ] Real archive metadata is correctly normalized.
+
+[ ] Product URLs are validated.
+
+[ ] FITS retrieval is secure.
+
+[ ] Real FITS products are downloaded successfully where available.
+
+[ ] FITS parser handles supported data types correctly.
+
+[ ] Multi-HDU handling works.
+
+[ ] WCS support is accurate for explicitly supported projections.
+
+[ ] Unsupported WCS is reported honestly.
+
+[ ] FITS statistics handle invalid pixels correctly.
+
+[ ] SkyExplorer works end to end.
+
+[ ] Target Intelligence distinguishes catalog resolution from archive observations.
+
+[ ] Timeline uses actual observation epochs.
+
+[ ] Image Comparison validates scientific compatibility.
+
+[ ] Real comparison is not confused with synthetic comparison.
+
+[ ] Spectral Studio never labels simulated spectra as real.
+
+[ ] MultiDatasets never fabricates catalog matches.
+
+[ ] AI Assistant is grounded in supplied data.
+
+[ ] Research Workspace works.
+
+[ ] Report Generator preserves provenance.
+
+[ ] All interactive controls work.
+
+[ ] Arabic and English interfaces work.
+
+[ ] Mobile layout works.
+
+[ ] Security audit completed.
+
+[ ] Build passes.
+
+[ ] TypeScript checks pass.
+
+[ ] Automated tests pass.
+
+[ ] Five challenge targets individually tested.
+
+[ ] README updated.
+
+[ ] Environment configuration documented.
+
+[ ] Final project is packaged cleanly.
+
+---
+
+20. REQUIRED WORK EXECUTION STRATEGY
+
+Work in these phases, in order.
+
+PHASE 1 — FULL CODEBASE AUDIT
+
+Inspect every relevant file.
+
+Produce an internal checklist of defects.
+
+Identify dependencies and integration relationships.
+
+Do not stop here.
+
+PHASE 2 — BACKEND AND SECURITY
+
+Fix archive integration, product retrieval, validation, security, and provenance.
+
+PHASE 3 — SCIENTIFIC DATA ENGINE
+
+Fix FITS parsing, HDU handling, WCS, statistics, and rendering.
+
+PHASE 4 — FRONTEND INTEGRATION
+
+Fix SkyExplorer, Target Intelligence, Timeline, Image Comparison, Spectral Studio, MultiDatasets, AI Assistant, Workspace, and Reports.
+
+PHASE 5 — AUTOMATED TESTING
+
+Implement and run the tests.
+
+Fix failures and rerun them.
+
+PHASE 6 — END-TO-END VALIDATION
+
+Test the actual user workflows and five challenge targets.
+
+PHASE 7 — FINAL CLEANUP
+
+Resolve dependency issues, remove dead code, document environment configuration, and prepare the final project.
+
+PHASE 8 — FINAL PACKAGE
+
+Produce the final updated project as a downloadable ZIP.
+
+Ensure it contains the actual modified source files and all required project files.
+
+Exclude:
+
+- "node_modules".
+- Real ".env" files.
+- API keys.
+- Passwords.
+- Temporary caches.
+- Unnecessary generated files.
+
+Include:
+
+- Source code.
+- Configuration.
+- Lockfile.
+- Tests.
+- README.
+- ".env.example".
+
+---
+
+21. STRICT FINAL REPORT FORMAT
+
+When you finish, provide a concise but detailed engineering report with these sections:
+
+A. Files Modified
+
+List the important modified and created files and what changed.
+
+B. Critical Problems Fixed
+
+Explain each major problem and the actual implemented solution.
+
+C. Scientific Validation
+
+Explain what is genuinely validated, including FITS, WCS, image comparison, Timeline, and spectral processing.
+
+D. Five Target Results
+
+Provide a table with actual results for all five challenge targets.
+
+E. Test Results
+
+Show actual commands executed, results, and failures.
+
+F. Security Results
+
+List the security tests executed and their outcomes.
+
+G. Remaining Limitations
+
+List anything that could not be implemented or verified, with the exact reason.
+
+H. Final Project Package
+
+Provide the actual final ZIP.
+
+I. Final Completion Assessment
+
+Choose exactly one:
+
+- COMPLETE AND VERIFIED.
+- FUNCTIONALLY COMPLETE WITH EXTERNAL DATA LIMITATIONS.
+- PARTIALLY COMPLETE — SPECIFIC ISSUES REMAIN.
+
+Only choose COMPLETE AND VERIFIED if every required acceptance criterion has actually been implemented and independently tested.
+
+Never mark an untested feature as PASS.
+
+Never report invented test results.
+
+Never hide a failed test.
+
+---
+
+FINAL DIRECTIVE
+
+I do not want another report that simply says the project is complete.
+
+I want the actual project to become as complete, reliable, secure, scientifically honest, and professionally usable as the available environment and official SPHEREx data permit.
+
+Make the necessary code changes directly.
+
+Work through every phase.
+
+Test your implementations.
+
+Fix the failures you discover.
+
+Do not stop when the first build passes.
+
+Do not replace real functionality with mock data.
+
+Do not claim that external archive functionality works when it has not been verified.
+
+If a feature cannot be completed because of an actual limitation in the official data, explain that limitation and implement the best scientifically honest fallback.
+
+YOUR PRIMARY DELIVERABLE IS THE MODIFIED, TESTED, COMPLETE PROJECT ZIP — NOT THIS REPORT.
+
+Begin by inspecting the current project files, then execute the entire plan without waiting for further instructions.

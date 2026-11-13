@@ -1,0 +1,6 @@
+{
+  "name": "SPHEREx ATLAS — Infrared Universe Intelligence",
+  "description": "Scientific exploration and intelligence platform for NASA's SPHEREx mission, infrared sky mapping, FITS analysis, and spectral investigation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
